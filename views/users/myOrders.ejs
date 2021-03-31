@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <style>
+
+        label {
+            color: #ab564e;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        input, select {
+            color: #495D63 !important;
+            font-weight: bold !important;
+            font-size: 15px !important;
+        }
+
+        .error {
+            color: red !important;
+            font-weight: normal;
+        }
+
+        #detailsBTN {
+            color: #abffa8;
+            background-color: #008277;
+        }
+
+
+        .page-head_agile_info_w3l {
+            min-height: 200px !important;
+        }
+
+        #printoutBTN {
+            font-size: 16px;
+            color: #fff !important;
+            background: #F45C5D;
+            outline: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px 45px;
+            -webkit-appearance: none;
+            -webkit-transition: .5s all;
+            -moz-transition: .5s all;
+            transition: .5s all;
+            /*margin-top: 20px;*/
+        }
+
+        #printoutBTN:hover {
+            background: #0879c9;
+            -webkit-transform: translateY(8px);
+            -ms-transform: translateY(8px);
+            -o-transform: translateY(8px);
+            -ms-transform: translateY(8px);
+            transform: translateY(8px);
+        }
+
+        #printIcon{
+            color: #F45C5D !important;
+        }
+    </style>
+
+    <script>
+
+        // VIEW Your_All_Orders
+        function getMyOrders() {
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(typeof data);
+                    console.log(data);
+                    // console.log(this.response);
+
+                    var html = "<table class='table table-bordered table-sm'>";
+                    html += "<thead>" +
+                        "<tr style='font-size: 14px;' class='bg-info text-center text-uppercase text-white'>" +
+                        "<th>sr&nbsp;no</th>" +
+                        "<th>view&nbsp;details</th>" +
+                        // "<th>username</th>" +
+                        "<th>bill&nbsp;i.d.</th>" +
+                        "<th>date&nbsp;of&nbsp;order</th>" +
+                        "<th>Total&nbsp;amount</th>" +
+                        "<th>payment&nbsp;mode</th>" +
+                        "<th>address</th>" +
+                        "<th>province</th>" +
+                        "<th>postalcode</th>" +
+                        "<th>status</th>" +
+                        "<th>controls</th>" +
+                        "</tr>" +
+                        "</thead>" +
+                        "<tbody>";
+                    let srn = 1;
+                    for (var i = 0; i < data.length; i++) {
+
+                        html += "<tr class='bg-secondary text-center text-white'>";
+                        // style='min-width: 200px;'
+                        html += "<td>" + srn + "</td>";
+                        html += "<td><button type='button' id='detailsBTN' class='btn btn-sm' onclick='bill_details(\"" + data[i].id + "\")'>Order Details <i class='far fa-grin-hearts'></i></button></td>";
+
+                        html += "<td>" + data[i].id + "</td>";
+                        html += "<td style='min-width: 200px;'>" + data[i].datetime.toString().replace('T', ' ') + "</td>";
+                        html += "<td>" + data[i].grandtotal + "</td>";
+                        html += "<td>" + data[i].paymentmethod + "</td>";
+                        html += "<td>" + data[i].address + "</td>";
+                        html += "<td>" + data[i].province + "</td>";
+                        html += "<td>" + data[i].postalcode + "</td>";
+
+                        // status --> placed || cancelled
+                        if (data[i].status == 'placed') {
+                            html += "<td class='text-capitalize font-weight-bold' style='color: #abffa8'>" + data[i].status + "</td>";
+                        } else {
+                            html += "<td class='text-capitalize font-weight-bold' style='color: red;'>" + data[i].status + "</td>";
+                        }
+
+                        // Cancel Button
+                        if (data[i].status == 'placed') {
+                            html += "<td><button type='button' id='cancelBTN' onclick='cancelorder(\"" + data[i].id + "\")' class='btn btn-danger btn-sm'>Cancel Order</button></td>";
+                        } else {
+                            html += "<td></td>";
+                        }
+                        html += "</tr>";
+                        srn++;
+                    }
+                    html += "</tbody></table>";
+
+                    document.getElementById("content").innerHTML = html;
+                } else {
+                    document.getElementById("content").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            httpRequest.open("GET", "./get_My_Orders_Request", true);
+            httpRequest.send();
+        }
+
+        // modap pop-up
+        function bill_details(id) {
+            $("#details_BTN_Modal").modal('show');
+            $("#form-heading").html('Bill Details');
+            viewbilldetails(id);
+        }
+
+        function cancelorder(id) {
+
+            let formdata = new FormData();
+            formdata.append('cancelid', id);
+            // formdata.append('action', 'getstock');
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    if (this.response == "updated") {
+                        getMyOrders();
+
+                    }
+                } else {
+                    document.getElementById("cancelBTN").innerHTML = "<span class='spinner-border'></span>";
+                }
+            }
+            httpRequest.open("POST", "./cancel_Order_request", true);
+            httpRequest.send(formdata);
+        }
+
+        // VIEW_Bill_Details Request
+        function viewbilldetails(id) {
+
+            let formdata = new FormData();
+            formdata.append('id', id);
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(typeof data);
+                    console.log(data);
+
+                    var html = ""
+                    html += "<table class='table table-responsive'>"
+                    html += "<thead><tr class='bg-info h5 text-center text-uppercase text-white'>" +
+                        "<th>sr&nbsp;no</th>" +
+                        // "<th>bill&nbsp;detail&nbsp;id</th>" +
+                        "<th>product</th>" +
+                        "<th>image</th>" +
+                        "<th>description</th>" +
+                        "<th>price</th>" +
+                        "<th>Discount</th>" +
+                        "<th>netprice</th>" +
+                        "<th>quantity</th>" +
+                        "</tr></thead><tbody>";
+
+                    let srn = 1;
+                    for (var i = 0; i < data.length; i++) {
+
+                        html += "<tr class='bg-secondary text-center text-white'>";
+                        html += "<td>" + srn + "</td>";
+                        // html += "<td>" + data[i].id + "</td>";
+                        html += "<td style='max-width: 100px;' class='font-weight-bold text-warning'>" + data[i].productname + "</td>";
+                        html += "<td><img src='../" + data[i].photo + "' style='height: 100px'></td>";
+                        html += "<td style='min-width: 200px;'>" + data[i].pdescription + "</td>";
+                        html += "<td>" + data[i].price + "</td>";
+                        html += "<td>" + data[i].discount + "</td>";
+                        html += "<td>" + data[i].netprice + "</td>";
+                        html += "<td>" + data[i].quantity + "</td>";
+
+                        html += "</tr>";
+                        srn++;
+                    }
+                    html += "</tbody></table>";
+
+                    document.getElementById("billcontent").innerHTML = html;
+                } else {
+                    document.getElementById("billcontent").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            httpRequest.open("POST", "./get_My_OrdersDetails_Request", true);
+            httpRequest.send(formdata);
+        }
+
+        //  --* TO check User SESSION is created or not *--
+        function checkSession() {
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.response);
+                    if (this.response == "") {
+                        window.location.assign("/users/userlogin");
+                    } else {
+
+                    }
+                }
+            }
+            httpRequest.open("GET", "./userSession_forCart", true);
+            httpRequest.send();
+        }
+
+        $(document).ready(function () {
+            checkSession();
+            getMyOrders();
+        })
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('userHeader') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">My Orders</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="">Home</a></li>
+                        <li class="breadcrumb-item active">My Orders</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <div class="container">
+        <!-- Orders Table, Tabs-->
+        <div class="entry-w3pvt-main py-5">
+            <div class="container">
+                <div class="row">
+
+                    <!-- TABS-->
+                    <div class="col-lg-5">
+                        <div class="bs-example">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a href="/users/myorders" class="nav-link active text-success font-weight-bold">My
+                                        Orders
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/users/cancelledorders" class="nav-link" style="color: tomato">
+                                        Cancelled Orders
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- //TABS-->
+
+
+                    <div class="col-lg-5 mt-sm-3 mt-md-3 mt-3 mt-lg-0 text-center">
+                        <form>
+                            <i class="fas fa-print fa-3x" id="printIcon"></i> <input type="button" id="printoutBTN" value="Print Order Details" onclick="window.print()"/>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+            <br>
+            <br>
+            <!-- table-->
+            <div class="table-responsive" id="content">
+            </div>
+            <!-- //table-->
+        </div>
+        <!-- //Orders Table, Tabs-->
+    </div>
+
+    <%- include('../footer') %>
+
+    <!-- MODAL (Details modal)-->
+    <div class="modal fade" id="details_BTN_Modal">
+        <div class="modal-dialog modal-lg modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="form-heading" class="alert alert-info"></h2>
+                    <a href="#" class="close" data-dismiss="modal">&times;</a>
+                </div>
+                <div class="modal-body" id="billcontent">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //MODAL Details modal-->
+</div>
+
+</body>
+</html>

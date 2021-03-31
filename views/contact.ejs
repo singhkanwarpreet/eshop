@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Contact Us</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <%- include('headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <script>
+
+        // ADD Feedback Request Handler
+        function addFeedback() {
+            $("#contactForm").validate();
+            if ($("#contactForm").valid()) {
+
+                let formControls = document.getElementById("contactForm").elements;
+                let formDta = new FormData();
+                for (let i = 0; i < formControls.length; i++) {
+                    formDta.append(formControls[i].name, formControls[i].value);
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn1").innerHTML = "Send Message";
+
+                        // added
+                        if (this.response == "added") {
+                            document.getElementById("contactForm").reset();
+                            alert("Saved")
+                        }
+                    } else {
+                        document.getElementById("btn1").innerHTML = "<span class='spinner-border'></span>";
+                    }
+                }
+                httpRequest.open('POST', './feedback_Request', true);
+                httpRequest.send(formDta);
+            }
+        }
+
+        $(document).ready(function () {
+            getcartproduct();
+        });
+    </script>
+
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper">
+
+    <%- include('header') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Contact Us</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Contact Us</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <!-- main-content-wrap start -->
+    <div class="main-content-wrap section-ptb contact-us-page">
+        <div class="container">
+            <div class="row mt-5">
+                <div class="col-lg-12">
+                    <div class="contact-info-wrapper">
+                        <h2>Get in Touch</h2>
+                        <p>We are please to handle our client's queries online as well as by booking an appointment. Below is our contact details.</p>
+                        <ul class="contact-info-list">
+                            <li> <strong>Address:</strong>  Montreal QC, Canada</li>
+                            <li><strong>Phone:</strong>  +1 (514)561-8794</li>
+                            <li><strong>Email:</strong> <a href="#"> e.shop@gmail.com</a></li>
+                        </ul>
+                        <div class="contact-form-warp">
+                            <form id="contactForm">
+                                <div class="row">
+                                    <div class="col-lg-10">
+                                        <input data-rule-required="true" type="text" id="fullname" name="fullname" placeholder="Your Name*">
+                                    </div>
+                                    <div class="col-lg-10">
+                                        <input data-rule-required="true" type="email" id="conEmail" name="conEmail" placeholder="Mail Address*">
+                                    </div>
+                                    <div class="col-lg-10">
+                                        <textarea data-rule-required="true" name="messageBox" id="messageBox" placeholder="Your Message*"></textarea>
+                                    </div>
+                                </div>
+                                <div class="contact-submit-btn">
+                                    <button onclick="addFeedback()" type="button" id="btn1" class="submit-btn">Send Email</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- main-content-wrap end -->
+
+    <%- include('footer') %>
+
+</div>
+<!-- Main Wrapper End -->
+
+</body>
+</html>

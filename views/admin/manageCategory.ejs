@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Manage Category</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <style>
+        label {
+            color: #ab564e;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            font-size: 12px;
+        }
+    </style>
+
+    <script>
+
+        // ADD (New Category) Request Handler
+        function addNewCategory() {
+            $("#adminForm").validate();
+            if ($("#adminForm").valid()) {
+
+                let formControls = document.getElementById("adminForm").elements;
+
+                let formDta = new FormData();
+                for (let i = 0; i < formControls.length; i++) {
+                    if (formControls[i].type == "file") {
+                        formDta.append(formControls[i].name, formControls[i].files[0]);
+                    } else if (formControls[i].type == "radio") {
+                        if (formControls[i].checked) {
+                            formDta.append(formControls[i].name, formControls[i].value);
+                        }
+                    } else {
+                        formDta.append(formControls[i].name, formControls[i].value);
+                    }
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn1").innerHTML = "SAVE";
+
+                        // added
+                        if (this.response == "added") {
+                            document.getElementById("adminForm").reset();
+                            getcategory();
+                            document.getElementById("output").innerHTML = "<h4 class='mt-2 text-center alert alert-success'>New Category Added Successfully</h4>";
+                        }
+                        // updated
+                        else if (this.response == "updated") {
+                            getcategory();
+                            document.getElementById("output").innerHTML = "<h4 class='mt-2 text-center alert alert-info'>Category Updated</h4>";
+                        } else {
+                            document.getElementById("output").innerHTML = "<h4 class='mt-2 text-center alert alert-warning'>Some Error Occurred</h4>";
+                        }
+                    } else {
+                        document.getElementById("btn1").innerHTML = "<span class='spinner-border'></span>";
+                    }
+                }
+                httpRequest.open('POST', './categoryRequest', true);
+                httpRequest.send(formDta);
+            }
+        }
+
+        // VIEW Category Request Handler
+        function getcategory() {
+
+            let formData = new FormData();
+            // ID(action) ki Value (view) fix send karenge.
+            formData.append("action", "view");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    let categories = JSON.parse(this.response);
+
+                    let html = "<table class='table table-bordered'><thead><tr class='bg-info h5 text-center text-uppercase' style='color: white'>" +
+                        "<th>Sr&nbsp;No.</th>" +
+                        "<th>Category&nbsp;Name</th>" +
+                        "<th>Description</th>" +
+                        "<th>Super&nbsp;Category</th>" +
+                        "<th colspan='2'>Controls</th>" +
+                        "</tr></thead><tbody>";
+
+                    let srno = 1;
+                    for (let categorie of categories) {
+                        html += "<tr class='bg-secondary text-center' style='color: white'>";
+
+                        html += "<td>" + srno + "</td>";
+                        html += "<td class='font-weight-bold text-capitalize' style='color: rgba(221,221,221,0.89);'>" + categorie.categoryname + "</td>";
+                        html += "<td style='max-width: 400px;'>" + categorie.description + "</td>";
+                        html += "<td>" + categorie.supercategory + "</td>";
+
+                        // html += "<td><button type='button' class='btn btn-danger'><i class='fa fa-trash'></i> Delete</button></td>";
+                        html += "<td><button type='button' class='btn btn-danger' onclick='delete_category(\"" + categorie.categoryid + "\")'><i class='fas fa-trash-alt'></i> Delete</button></td>";
+
+                        // html += "<td><button type='button' class='btn btn-warning'><i class='fa fa-edit'></i> Edit</button></td>";
+                        html += "<td><button type='button' class='btn btn-warning' onclick='edit_category(" + JSON.stringify(categorie) + ")'><i class='fas fa-edit'></i> Edit</button></td>";
+
+
+                        html += "</tr>";
+                        srno++;
+                    }
+
+                    html += "</tbody></table>";
+
+                    document.getElementById("content").innerHTML = html;
+                } else {
+                    document.getElementById("content").innerHTML = "<span class='spinner-border'></span>";
+                }
+            }
+            httpRequest.open('POST', './categoryRequest', true);
+            httpRequest.send(formData);
+        }
+
+        //  --* TO check User SESSION *--
+        function checkSession() {
+            let formData = new FormData();
+
+            // ID-> action ki Value (view) fix send karenge.
+            formData.append("action", "session");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.response);
+                    if (this.response == "") {
+                        window.location.assign("/admin/adminlogin")
+                    } else {
+
+                    }
+                }
+            }
+            httpRequest.open("POST", "./categoryRequest", true);
+            httpRequest.send(formData);
+        }
+
+        // DELETE Category
+        function delete_category(categoryid) {
+
+            if (confirm("Are you sure to delete this CATEGORY ?")) {
+
+                var formdata = new FormData();
+                formdata.append('categoryid', categoryid);
+                formdata.append('action', 'delete');
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+
+                        if (this.response == "deleted") {
+                            getcategory();
+                            setTimeout(() => {
+                                alert("Category Deleted");
+                            }, 1000);
+                        }
+                    } else {
+                    }
+                }
+                httpRequest.open("POST", "./categoryRequest", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        // ADD New Category Modal || + icon
+        function addAdmin() {
+            $("#adminmodal").modal('show');
+            $("#modal-heading").html('Create New Category');
+
+            //  --* RESET *--
+            // document.getElementById("adminform").reset();
+            console.log($("#adminForm"));
+            console.log($("#adminForm")[0]);
+            $("#adminForm")[0].reset();
+
+            $("#categoryname").attr('readonly', false);
+            $("#action").val('add');
+
+        }
+
+        // UPDATE Category Modal
+        function edit_category(category_obj) {
+            /*
+            Same MODAL will be used to show at the time of UPDATE request
+            */
+            $("#adminmodal").modal('show');
+            $("#modal-heading").html('Edit Category');
+            $("#categoryname").val(category_obj.categoryname);
+            $("#categoryname").attr('readonly', true);
+            $("#categoryid").val(category_obj.categoryid);
+            $("#description").val(category_obj.description);
+            $("#supercategory").val(category_obj.supercategory);
+            $("#action").val('edit');
+        }
+
+        $(document).ready(function () {
+            // checkSession();
+            getcategory();
+        })
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('adminHeader') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Dashboard</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/admin/admindashboard">Home</a></li>
+                        <li class="breadcrumb-item active">Manage Category</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <!-- Add new admin ICON (plus)-->
+    <div class="container mt-5">
+
+        <!--<div class="col-sm-6 col-lg-offset-3">-->
+        <!--<div class="col-md-5 wthree_banner_bottom_left">-->
+        <h2 class="text-center mt-3" style="text-decoration: underline">Manage <strong
+                    style="color: tomato;">CATEGORY</strong>
+        </h2>
+        <hr>
+        <button type="button" class="btn btn-success" onclick="addAdmin()">Add New CATEGORY <i
+                    class="fa fa-plus-circle"></i></button>
+        <br>
+        <br>
+        <div class="table-responsive" id="content"></div>
+        <!--</div>-->
+    </div>
+    <!-- //Add new admin ICON (plus)-->
+
+    <%- include('../footer') %>
+
+    <!-- MODAL (ADD, EDIT)-->
+    <div class="modal fade" id="adminmodal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-heading" class="text-success font-weight-bold"></h2>
+                    <hr>
+                    <a href="#" class="close" data-dismiss="modal">&times;</a>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="">
+                            <form id="adminForm">
+
+                                <div class="form-group">
+                                    <label for="categoryname">Category Name</label>
+                                    <input type="text" data-rule-required="true" id="categoryname" name="categoryname"
+                                           class="form-control">
+                                    <!--Category ID-->
+                                    <input type="text" hidden id="categoryid" name="categoryid"
+                                           class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <!--<input type="text" data-rule-required="true" id="description" name="description"-->
+                                    <!--class="form-control">-->
+                                    <textarea data-rule-required="true" name="description" id="description" class="form-control"></textarea>
+                                    <!--<textarea data-rule-required="true" name="description" id="description" cols="30" rows="10" class="form-control"></textarea>-->
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="supercategory">Super-Category</label>
+                                    <select name="supercategory" id="supercategory" class="form-control">
+                                        <!--<select data-rule-required="true" name="supercategory" id="supercategory" class="form-control">-->
+                                        <option value="">Select Super-Category</option>
+                                        <option value="Men">Men</option>
+                                        <option value="Women">Women</option>
+                                        <option value="Kids">Kids</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="hidden" name="action" id="action">
+                                    <button type="button" id="btn1" class="btn btn-success" onclick="addNewCategory()">
+                                        Submit
+                                    </button>
+                                    <button type="button" data-dismiss="modal" class="btn btn-dark">Cancel</button>
+                                    <hr>
+                                    <div id="output"></div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="modal-footer">-->
+                <!--<a href="#" class="close" data-dismiss="modal">&times;</a>-->
+                <!--</div>-->
+            </div>
+        </div>
+    </div>
+    <!-- //MODAL (ADD, EDIT)-->
+</div>
+
+</body>
+</html>

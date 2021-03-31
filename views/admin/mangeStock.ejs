@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <script>
+
+        // Get CATEGORIES from Database to show in Select Tag
+        function getcategories() {
+
+            let formdata = new FormData();
+            // formdata.append("action", "getcategory");
+            formdata.append("action", "view");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(data)
+
+                    var html = "<select name='categoryid' id='categoryid' class='form-control' onchange=\"getsubcategoriesbycategory(this.value,'')\">";
+
+                    html += "<option value=''>Select Category</option>";
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        html += "<option class='text-capitalize' value='" + data[i].categoryid + "'>" + data[i].categoryname + "</option>";
+                    }
+                    html += "</select>";
+
+                    document.getElementById("categoryid").innerHTML = html;
+                } else {
+                    document.getElementById("categoryid").innerHTML = "<span class='spinner-border' ></span>";
+                }
+
+            }
+            httpRequest.open("POST", "./categoryRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // Get SUB-CATEGORIES related to CATEGORIES from Database to show in Select Tag
+        function getsubcategoriesbycategory(categoryid, subcategoryid) {
+
+            let formdata = new FormData();
+            formdata.append('categoryid', categoryid)
+            formdata.append('action', 'getsubcategory');
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(data);
+
+                    var html = "<select name='subcategoryid' id='subcategoryid' class='form-control'>";
+
+                    html += "<option value=''>Select Sub-Category</option>";
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        if (subcategoryid == data[i].subcategoryid) {
+                            html += "<option class='text-capitalize' selected value='" + data[i].subcategoryid + "'>" + data[i].subcategoryname + "</option>";
+                        } else {
+                            html += "<option class='text-capitalize' value='" + data[i].subcategoryid + "'>" + data[i].subcategoryname + "</option>";
+                        }
+                    }
+                    html += "</select>";
+
+                    document.getElementById("subcategoryid").innerHTML = html;
+                } else {
+
+                }
+            }
+            httpRequest.open("POST", "./productRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // Get PRODUCTS related to SUB-CATEGORIES from Database to show in Select Tag
+        function getproductbysubcategory(subcategoryid, productid) {
+
+            let formdata = new FormData();
+            formdata.append('action', 'getproduct');
+            formdata.append('subcategoryid', subcategoryid)
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+                    console.log(data);
+
+                    var html = '';
+
+                    html = "<select name='productid' id='productid' class='form-control'>";
+                    html += "<option value=''>Select Product</option>";
+
+                    for (var i = 0; i < data.length; i++) {
+                        if (productid == data[i].productid) {
+                            html += "<option class='text-capitalize' selected value='" + data[i].productid + "'>" + data[i].productname + "</option>";
+                        } else {
+                            html += "<option class='text-capitalize' value='" + data[i].productid + "'>" + data[i].productname + "</option>";
+                        }
+                    }
+                    html += "</select>";
+
+                    document.getElementById("productid").innerHTML = html;
+                } else {
+                    document.getElementById("productid").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            httpRequest.open("POST", "./stockRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // ADD New Stock Request
+        function addNewStock() {
+            $("#stockform").validate();
+            if ($("#stockform").valid()) {
+
+                var formcontrols = document.getElementById("stockform").elements;
+                var formdata = new FormData();
+                for (var i = 0; i < formcontrols.length; i++) {
+                    if (formcontrols[i].type == "radio") {
+                        if (formcontrols[i].checked) {
+                            formdata.append(formcontrols[i].name, formcontrols[i].value);
+                        }
+                    } else if (formcontrols[i].type == "file") {
+                        formdata.append(formcontrols[i].name, formcontrols[i].files[0]);
+
+                    } else {
+                        formdata.append(formcontrols[i].name, formcontrols[i].value);
+                    }
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn1").innerHTML = "Submit";
+
+                        // added
+                        if (this.response == "added") {
+                            getStock();
+                            // document.getElementById("stockform").reset();
+                            document.getElementById("output").innerHTML = "<h4 class='mt-2 text-center alert alert-success'><i class='far fa-check-circle'></i> Stock Added Successfully</h4>";
+                        } else {
+                            alert("Stock already exist. !!");
+                        }
+                    } else {
+                        document.getElementById("btn1").innerHTML = "<span class='spinner-border text-warning'></span>";
+                    }
+                }
+                httpRequest.open("POST", "./stockRequest", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        // VIEW Stock Request
+        function getStock() {
+
+            let formdata = new FormData();
+            formdata.append("action", "view");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(typeof data);
+                    console.log(data);
+                    // console.log(this.response);
+
+                    if (data.length == 0) {
+                        document.getElementById("content").innerHTML = "<div class='text-center jumbotron'>" +
+                            "<a href='#'>" +
+                            "<h3 class='text-center text-capitalize font-weight-bold text-danger p-5'>" +
+                            "Please Add New Stock! <i class='far fa-frown'></i> &nbsp;&nbsp;</h3></a></div>";
+                    } else {
+                        var html = "<table class='table table-bordered table-sm'>";
+                        html += "<thead>" +
+                            "<tr class='bg-info h6 text-center text-uppercase text-white'>" +
+                            "<th>i.d.</th>" +
+                            "<th>product&nbsp;name</th>" +
+                            "<th>description</th>" +
+                            "<th>Quantity</th>" +
+                            "<th>DATE&nbsp;OF&nbsp;STOCK</th>" +
+                            "<th>operation</th>" +
+                            "</tr>" +
+                            "</thead>" +
+                            "<tbody>";
+
+                        let srn = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+                            html += "<tr class='bg-secondary text-center text-white'>";
+
+                            html += "<td class='font-italic'>" + srn + "</td>";
+                            html += "<td class='text-uppercase'>" + data[i].productname + "</td>";
+                            html += "<td style='min-width: 200px;'>" + data[i].pdescription + "</td>";
+                            html += "<td class='text-dark font-weight-bold'>" + data[i].qty + "</td>";
+                            html += "<td style='min-width: 250px;'>" + data[i].dateofstock.toString().replace('T', ' ').replace('.000Z', ' ') + "</td>";
+
+                            html += "<td style='min-width: 50px;'><button type='button' class='btn btn-warning' onclick='edit_stocks(" + JSON.stringify(data[i]) + ")' style='margin-top: 7px;'><i class='fas fa-edit'></i> Edit</button>";
+                            html += "<br>";
+                            html += "<button type='button' class='btn btn-danger' onclick='remove_stocks(\"" + data[i].stockid + "\")' style='margin-top: 7px;'><i class='fas fa-trash-alt'></i> Delete</button></td>";
+
+                            html += "</tr>";
+                            srn++;
+                        }
+                        html += "</tbody></table>";
+
+                        document.getElementById("content").innerHTML = html;
+                    }
+                } else {
+                    document.getElementById("content").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            httpRequest.open("POST", "./stockRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // DELETE Stock Request
+        function remove_stocks(stockid) {
+            if (confirm("Are you sure to delete ?")) {
+
+                var formdata = new FormData();
+                formdata.append('stockid', stockid);
+                formdata.append('action', 'delete');
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        if (this.response == "deleted") {
+                            getStock();
+                            setTimeout(() => {
+                                alert("Product Deleted Successfully.");
+                            }, 1000)
+                        }
+                    } else {
+                    }
+                }
+                httpRequest.open("POST", "./stockRequest", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        // + icon Stock modal pop-up
+        function stockModal() {
+            $("#stockmodal").modal('show');
+            $("#stockform")[0].reset();
+            $("#action").val('add');
+            $("#form-heading").html('Create New Stock');
+        }
+
+        // edit icon Stock modal pop-up
+        function edit_stocks(stocks_obj) {
+            $("#updateStockModal").modal('show');
+            $("#form-heading_1").html('Update Stocks');
+            // $("#img123").attr('src', '../' + product_obj.photo);
+
+            $("#stockid").val(stocks_obj.stockid);
+            $("#productid_U").val(stocks_obj.productid);
+            // $("#productid").attr('readonly', true);
+            // $("#productid_U").val(stocks_obj.productname);
+
+            $("#qty_U").val(stocks_obj.qty);
+            $("#action").val('edit');
+
+            // getproductbysubcategory(stocks_obj.subcategoryid, stocks_obj.productid)
+        }
+
+        // UPDATE Stock Request
+        function updateStock() {
+            $("#updateStockForm").validate();
+            if ($("#updateStockForm").valid()) {
+
+                var formcontrols = document.getElementById("updateStockForm").elements;
+                var formdata = new FormData();
+                for (var i = 0; i < formcontrols.length; i++) {
+                    if (formcontrols[i].type == "radio") {
+                        if (formcontrols[i].checked) {
+                            formdata.append(formcontrols[i].name, formcontrols[i].value);
+                        }
+                    } else if (formcontrols[i].type == "file") {
+                        formdata.append(formcontrols[i].name, formcontrols[i].files[0]);
+
+                    } else {
+                        formdata.append(formcontrols[i].name, formcontrols[i].value);
+                    }
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn2").innerHTML = "Update";
+
+                        // updated
+                        if (this.response == "updated") {
+                            getStock();
+                            $("#updateStockModal").modal('hide');
+
+                            setTimeout(() => {
+                                alert("Product Updated Successfully.");
+                            }, 1000)
+                        }
+                    } else {
+                        document.getElementById("btn2").innerHTML = "<span class='spinner-border text-warning'></span>";
+                    }
+                }
+                httpRequest.open("POST", "./stockRequest", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        //  --* TO check User SESSION is created or not *--
+        function checkSession() {
+            let formData = new FormData();
+
+            // ID-> action ki Value (view) fix send karenge.
+            formData.append("action", "session");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.response);
+                    if (this.response == "") {
+                        window.location.assign("/admin/adminlogin")
+                    } else {
+
+                    }
+                }
+            }
+            // httpRequest.open("GET", "./checkSession", true);
+            httpRequest.open("POST", "./productRequest", true);
+            httpRequest.send(formData);
+        }
+
+        $(document).ready(function () {
+            checkSession();
+            getcategories();
+            getStock();
+        })
+
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('adminHeader') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Dashboard</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/admin/admindashboard">Home</a></li>
+                        <li class="breadcrumb-item active">Dashboard</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <!-- Add new Stock ICON (plus)-->
+    <div class="entry-w3pvt-main py-5">
+        <div class="container px-lg-5 py-md-3">
+            <div class="entry-w3layouts-info">
+                <h2 class="text-center"><U>Manage <span class="text-danger font-weight-bold"> Stocks</span> </U></h2>
+                <hr>
+                <button type="button" class="btn btn-success" onclick="stockModal()">Add New Stock <i
+                            class="fa fa-plus-circle"></i>
+                </button>
+                <br>
+                <br>
+
+                <div class="table-responsive" id="content">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //Add new Stock ICON (plus)-->
+
+    <%- include('../footer') %>
+
+    <!-- MODAL (ADD Stock)-->
+    <div class="modal fade" id="stockmodal">
+        <div class="modal-dialog modal-lg modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="form-heading" class="alert alert-info"></h2>
+                    <a href="#" class="close" data-dismiss="modal">&times;</a>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="col-lg-12">
+                            <form id="stockform">
+
+                                <!--Category, Sub-Category-->
+                                <div class="form-row">
+
+                                    <!--Category-->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="categoryid">Category</label>
+                                            <select data-rule-required="true" name="categoryid" id="categoryid"
+                                                    class="form-control"
+                                                    onchange="getsubcategoriesbycategory(this.value,'')">
+                                                <option value="">Select Category</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!--Sub-Category-->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="subcategoryid">Sub-Category</label>
+                                            <!--<input type="text" name="subcategoryname" id="subcategoryname"-->
+                                            <!--class="form-control">-->
+
+                                            <select data-rule-required="true" name="subcategoryid" id="subcategoryid"
+                                                    class="form-control"
+                                                    onchange="getproductbysubcategory(this.value,'')">
+                                                <option value="">Select Sub-Category</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!--Product, Quantity-->
+                                <div class="form-row">
+
+                                    <!--Product-->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="productid">Product</label>
+                                            <select data-rule-required="true" name="productid" id="productid"
+                                                    class="form-control">
+                                                <option value="">Select Product</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!--Quantity-->
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="qty">Quantity</label>
+                                            <input data-rule-required="true" type="number" name="qty" id="qty"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!--<div class="form-group">-->
+                                <!--<label for="dateofstock">Date of Stock</label>-->
+                                <!--<input data-rule-required="true" type="date" name="dateofstock" id="dateofstock"-->
+                                <!--class="form-control">-->
+                                <!--</div>-->
+
+                                <!--Buttons-->
+                                <div class="form-group">
+                                    <input type="hidden" name="action" id="action">
+                                    <!-- <input type="hidden" name="productid" id="productid">-->
+                                    <button type="button" id="btn1" onclick="addNewStock()" class="btn btn-success">
+                                        Submit
+                                    </button>
+                                    <button type="button" data-dismiss="modal" class="btn btn-dark">
+                                        Cancel
+                                    </button>
+                                    <hr>
+                                    <div id="output"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //MODAL (ADD Stock)-->
+
+    <!-- MODAL (EDIT Stock)-->
+    <div class="modal fade" id="updateStockModal">
+        <!--<div class="modal-dialog modal-lg modal-sm">-->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="form-heading_1" class="alert alert-info"></h2>
+                    <a href="#" class="close" data-dismiss="modal">&times;</a>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="col-lg-12">
+                            <p class="text-danger">*You can update the quantity of products only.</p>
+                            <form id="updateStockForm">
+
+                                <!--Product, Quantity-->
+                                <div class="form-row">
+
+                                    <!--Quantity-->
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label for="qty_U">Quantity</label>
+                                            <input data-rule-required="true" type="number" name="qty_U" id="qty_U"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- //Product, Quantity-->
+
+                                <!--Buttons-->
+                                <div class="form-group">
+                                    <input type="hidden" name="action" id="action">
+                                    <input type="hidden" name="stockid" id="stockid">
+                                    <button type="button" id="btn2" onclick="updateStock()" class="btn btn-success">
+                                        Update
+                                    </button>
+                                    <button type="button" data-dismiss="modal" class="btn btn-dark">
+                                        Cancel
+                                    </button>
+                                    <hr>
+                                    <div id="output"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //MODAL (EDIT Stock)-->
+
+</div>
+
+</body>
+</html>

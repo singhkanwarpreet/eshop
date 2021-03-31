@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>e-Shop</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <%- include('headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            getAllProducts();
+            getcartproduct();
+        });
+    </script>
+
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('header') %>
+
+    <!-- Hero Slider Start -->
+    <div class="hero-slider hero-slider-one ">
+
+        <!-- Single Slide Start -->
+        <div class="single-slide" style="background-image: url(../images/slider/banner-1.jpg)">
+            <!-- Hero Content One Start -->
+            <div class="hero-content-one container">
+                <div class="row">
+                    <div class="col-lg-6 col-md-8">
+                        <div class="slider-text-info pt-0">
+                            <h3 class="">Top Selling!</h3>
+                            <h1 style="color: #fff;">New Arrivals</h1>
+                            <p style="color: #fff;">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+                                eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua.</p>
+                            <a href="/product" class="btn slider-btn uppercase"><span>SHOP NOW</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Hero Content One End -->
+        </div>
+        <!-- Single Slide End -->
+
+        <!-- Single Slide Start -->
+        <div class="single-slide" style="background-image: url(../images/slider/banner-2.jpg)">
+            <!-- Hero Content One Start -->
+            <div class="hero-content-one container">
+                <div class="row">
+                    <div class="col-lg-6 col-md-8">
+                        <div class="slider-text-info pt-0">
+                            <h3 class="">Top Selling!</h3>
+                            <h1 style="color: #fff;">New Collection</h1>
+                            <p style="color: #fff;">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+                                eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua.</p>
+                            <a href="#" class="btn slider-btn uppercase"><span>SHOP NOW</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Hero Content One End -->
+        </div>
+        <!-- Single Slide End -->
+    </div>
+    <!-- //Hero Section End -->
+
+    <!-- product-area start -->
+    <div class="product-area section-pb mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- section-title start -->
+                    <div class="section-title">
+                        <h2>Our Products</h2>
+                    </div>
+                    <!-- section-title end -->
+                </div>
+            </div>
+
+            <!-- product-warpper start -->
+            <div class="product-warpper" id="allproducts">
+                <div class="row"></div>
+            </div>
+            <!-- product-warpper start -->
+        </div>
+    </div>
+    <!-- //product-area end -->
+
+    <!-- lg-banner-bg start -->
+    <div class="lg-banner-area lg-banner-bg-2 section-ptb mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7 offset-lg-5">
+                    <div class="lg-banner-info text-center mt--30 mb--30">
+                        <h2>Contrary to popular belief is not simply rand.</h2>
+                        <a href="#" class="btn more-product-btn">MORE PRODUCTS</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //lg-banner-bg end -->
+
+    
+
+    <!-- our-brand-area start -->
+    <div class="our-brand-area section-ptb">
+        <h2 style="text-align: center;">Our Brands</h2>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="our-brand-active">
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/1.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/2.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/3.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/4.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/5.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/3.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/4.jpg" alt=""></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //our-brand-area end -->
+
+    <%- include('footer') %>
+
+</div>
+<!-- Main Wrapper End -->
+
+</body>
+</html>

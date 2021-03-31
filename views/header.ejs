@@ -1,0 +1,225 @@
+<!-- header-area start -->
+<div class="header-area">
+
+    <!-- header-top start -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 pt-2 pb-2">
+                    <!-- language-currency-wrapper start -->
+                    <div class="language-currency-wrapper">
+                        <ul>
+                            <!--       Dashboard-->
+                            <li class="drodown-show"><a href="/users/userdashboard"><i class="far fa-user-circle"></i>
+                                    My Dashboard</a></li>
+
+                            <!--       Login / Register-->
+                            <li class="drodown-show"><a href="#"><i class="fas fa-key"></i> Login / Register <i
+                                            class="ion-ios-arrow-down"></i></a>
+                                <ul class="open-dropdown">
+                                    <li class="active">
+                                        <a href="/users/usersignup"><i class="fas fa-user"></i> User Register</a>
+                                    </li>
+                                    <li><a href="/users/userlogin"><i class="fas fa-user-tie"></i> User Login</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <!-- language-currency-wrapper end -->
+                </div>
+
+                <div class="col-lg-6 col-md-6 pt-2 pb-2">
+                    <form action="./searchProductAction" method="post" id="searchBAR" class="form-inline">
+                        <input required name="searchProduct" id="searchProduct" class="form-control mr-sm-2"
+                               type="search" placeholder="Search product here ..." aria-label="Search">
+                        <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- header-top end -->
+
+    <div class="header-bottom-area header-sticky">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-2 col-md-5 col-5">
+                    <div class="logo">
+                        <a href="/"><img src="../images/logo/logo.png" alt=""></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 d-none d-lg-block">
+                    <div class="main-menu-area text-center">
+                        <nav class="main-navigation">
+                            <ul>
+                                <li class="active"><a href="/">Home</a></li>
+
+                                <li><a href="/product">Products</a></li>
+
+                                <li><a href="#">Men</a>
+                                    <form action="#">
+                                        <ul class="sub-menu" id="mensubcategory"></ul>
+                                    </form>
+                                </li>
+
+                                <li><a href="#">Women</a>
+                                    <form action="">
+                                        <ul class="sub-menu" id="womensubcategory"></ul>
+                                    </form>
+
+                                </li>
+
+                                <li><a href="#">Kids</a>
+                                    <form action="">
+                                        <ul class="sub-menu" id="kidsubcategory"></ul>
+                                    </form>
+
+                                </li>
+
+                                <li><a href="/about">About us</a></li>
+
+                                <li><a href="/contact">Contact us</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-7 col-7">
+                    <div class="right-blok-box d-flex">
+                        <div class="search-wrap">
+                            <!--                            <a href="#" class="trigger-search"><i class="icon-magnifier"></i></a>-->
+                        </div>
+
+                        <div class="user-wrap">
+                            <!--                            <a href="login-register.html"><i class="icon-users"></i></a>-->
+                        </div>
+
+                        <div class="shopping-cart-wrap">
+                            <a title="Shopping Cart" href="/users/usercart"><i class="icon-handbag"></i><span
+                                        id="cartcount"></span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="mobile-menu d-block d-lg-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- header-area end -->
+
+<!-- main-search start -->
+<div class="main-search-active">
+    <div class="sidebar-search-icon">
+        <button class="search-close"><span class="icon-close"></span></button>
+    </div>
+    <div class="sidebar-search-input">
+        <!--   Form-->
+        <form id="searchBAR">
+            <div class="form-search">
+                <input name="searchProduct" id="searchProduct" class="input-text"
+                       placeholder="Search entire store here ..." type="search">
+                <button onclick="searchMyProduct()" class="search-btn" type="button">
+                    <i class="icon-magnifier"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- main-search start -->
+
+<script>
+
+    // Search Product
+    function searchMyProduct() {
+        let formcontrols = document.getElementById("searchBAR").elements;
+        let formdata = new FormData();
+        for (let i = 0; i < formcontrols.length; i++) {
+            formdata.append(formcontrols[i].name, formcontrols[i].value);
+        }
+
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.response);
+                let html = '';
+                // if Search is empty..
+                if (this.response == 'empty') {
+                    alert("Enter product name to search");
+                } else {
+                }
+            } else {
+                // document.getElementById("searchResult").innerHTML = "<span class='spinner-border'></span>";
+            }
+        }
+        httpRequest.open("POST", "./searchProductAtion", true);
+        httpRequest.send(formdata);
+    }
+
+    // Get Men Subcategory
+    function getMenSubcategory() {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                let data = JSON.parse(this.response);
+                console.log(data);
+
+                let html = "";
+                for (var i = 0; i < data.length; i++) {
+                    html += "<li><a href='./showProductsSubcategoryVise?id=" + data[i].subcategoryid + "'  class='text-capitalize' >" + data[i].subcategoryname + "</a></li><br>";
+                }
+                document.getElementById("mensubcategory").innerHTML = html;
+            }
+        }
+        httpRequest.open("GET", "./getMenSubcategoryAction", true);
+        httpRequest.send();
+    }
+
+    // Get Women Subcategory
+    function getWomenSubcategory() {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                let data = JSON.parse(this.response);
+                console.log(data);
+
+                let html = "";
+                for (var i = 0; i < data.length; i++) {
+                    html += "<li><a href='./showProductsSubcategoryVise?id=" + data[i].subcategoryid + "' class='text-capitalize'>" + data[i].subcategoryname + "</a></li><br>";
+                }
+                document.getElementById("womensubcategory").innerHTML = html;
+            }
+        }
+        httpRequest.open("GET", "./getWomenSubcategoryAction", true);
+        httpRequest.send();
+    }
+
+    // Get Kids Subcategory
+    function getKidSubcategory() {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                let data = JSON.parse(this.response);
+                console.log(data);
+
+                let html = "";
+                for (var i = 0; i < data.length; i++) {
+                    html += "<li><a href='./showProductsSubcategoryVise?id=" + data[i].subcategoryid + "' class='text-capitalize'>" + data[i].subcategoryname + "</a></li><br>";
+                }
+                document.getElementById("kidsubcategory").innerHTML = html;
+            }
+        }
+        httpRequest.open("GET", "./getKidsSubcategoryAction", true);
+        httpRequest.send();
+    }
+
+    $(document).ready(function () {
+        getMenSubcategory();
+        getKidSubcategory();
+        getWomenSubcategory();
+    });
+</script>

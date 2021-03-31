@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <script>
+        //  --* TO check User SESSION is created or not *--
+        function checkSession() {
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.response);
+                    if (this.response == "") {
+                        window.location.assign("/users/userlogin");
+                    } else {
+
+                    }
+                }
+            }
+            httpRequest.open("GET", "./userSession_forCart", true);
+            httpRequest.send();
+        }
+
+        $(document).ready(function () {
+            checkSession();
+            // getcartproduct();
+        })
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('userHeader') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Dashboard</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Dashboard</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <div class="container mt-5 mb-5" style="background-color: rgba(171,255,168,0.26)">
+        <div class="col-sm-8 offset-sm-2 ">
+            <br>
+            <div class="text-center mt-5">
+                <h2>Welcome to <br> <strong style="color: #24b92d">Your Dashboard <i class='fa fa-caret-right'></i> <i
+                                class="fas fa-house-user fa-2x"></i></strong></h2>
+
+            </div>
+            <br>
+            <br>
+        </div>
+    </div>
+
+    <%- include('../footer') %>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Manage Products</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <style>
+
+        label {
+            color: #ab564e;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        input, select {
+            color: #495D63 !important;
+            font-weight: bold !important;
+            font-size: 15px !important;
+        }
+
+        .error {
+            font-size: 12px;
+        }
+    </style>
+
+    <script>
+
+        // Get CATEGORIES
+        function getcategories() {
+
+            let formdata = new FormData();
+            formdata.append("action", "view");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(typeof data)
+
+                    var html = "<select name='categoryid' id='categoryid' class='form-control' onchange=\"getsubcategoriesbycategory(this.value)\">";
+
+                    html += "<option value=''>Select Category</option>";
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        html += "<option class='text-capitalize' value='" + data[i].categoryid + "'>" + data[i].categoryname + "</option>";
+                    }
+                    html += "</select>";
+
+                    document.getElementById("categoryid").innerHTML = html;
+                } else {
+                    document.getElementById("categoryid").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            httpRequest.open("POST", "./categoryRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // Get SUB-CATEGORIES related to CATEGORIES
+        function getsubcategoriesbycategory(categoryid, subcategoryid) {
+            let formdata = new FormData();
+            formdata.append('categoryid', categoryid)
+            formdata.append('action', 'getsubcategory');
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.response);
+
+                    console.log(typeof data)
+
+                    var html = "<select name='subcategoryid' id='subcategoryid' class='form-control'>";
+
+                    html += "<option value=''>Select Sub-Category</option>";
+
+                    for (var i = 0; i < data.length; i++) {
+
+                        if (subcategoryid == data[i].subcategoryid) {
+                            html += "<option class='text-capitalize' selected value='" + data[i].subcategoryid + "'>" + data[i].subcategoryname + "</option>";
+                        } else {
+                            html += "<option class='text-capitalize' value='" + data[i].subcategoryid + "'>" + data[i].subcategoryname + "</option>";
+                        }
+                    }
+                    html += "</select>";
+
+                    document.getElementById("subcategoryid").innerHTML = html;
+                } else {
+
+                }
+            }
+            httpRequest.open("POST", "./productRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // ADD New Product Request
+        function addNewProduct() {
+            $("#productform").validate();
+            if ($("#productform").valid()) {
+                var formcontrols = document.getElementById("productform").elements;
+
+                var formdata = new FormData();
+                for (var i = 0; i < formcontrols.length; i++) {
+                    // alert(formcontrols[i].type);
+                    if (formcontrols[i].type == "radio") {
+                        if (formcontrols[i].checked) {
+                            formdata.append(formcontrols[i].name, formcontrols[i].value);
+                        }
+
+                    } else if (formcontrols[i].type == "file") {
+                        formdata.append(formcontrols[i].name, formcontrols[i].files[0]);
+
+                    } else {
+                        formdata.append(formcontrols[i].name, formcontrols[i].value);
+                    }
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn1").innerHTML = "Submit";
+
+                        if (this.response == "added") {
+                            getproduct();
+                            document.getElementById("productform").reset();
+                            document.getElementById("output").innerHTML = "<h4 class='mt-2 text-center alert alert-success'><i class='far fa-check-circle'></i> New Product Added Successfully</h4>";
+                        } else if (this.response == "updated") {
+                            getproduct();
+                            // document.getElementById("output").innerHTML = "<h4 class='mt-2 text-center alert alert-info'>Product Updated</h4>";
+                            $("#subcategorymodal").modal('hide');
+                            setTimeout(() => {
+                                alert("Product Updated");
+                            }, 1000)
+                        }
+                    } else {
+                        document.getElementById("btn1").innerHTML = "<span class='spinner-border text-warning'></span>";
+                    }
+                }
+                httpRequest.open("POST", "./productRequest", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        // VIEW Product Request
+        function getproduct() {
+
+            let formdata = new FormData();
+            formdata.append("action", "view");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    var data = JSON.parse(this.response);
+                    console.log(data);
+
+                    if(data.length == 0) {
+                        document.getElementById("content").innerHTML = `<div class="text-center">
+                                                                        <h3 class="text-success">Add New Products.</h3>
+                                                                        </div>`;
+                    } else {
+                        var html = "<table class='table table-bordered mt-2 table-sm'>";
+                        html += "<thead>" +
+                            "<tr class='bg-info text-center text-uppercase' style='color: white'>" +
+                            "<th>Sr&nbsp;No</th>" +
+                            "<th>SubCategory&nbsp;Name</th>" +
+                            "<th>Product&nbsp;Name</th>" +
+                            "<th>Description</th>" +
+                            "<th>Price</th>" +
+                            "<th>Discount</th>" +
+                            "<th>Photo</th>" +
+                            "<th>Controls</th>" +
+                            "</tr></thead>" +
+                            "<tbody>";
+
+                        let srn = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+                            html += "<tr class='bg-secondary text-center' style='color: white'>";
+
+                            // style='max-width: 350px;'
+                            html += "<td class='font-italic'>" + srn + "</td>";
+                            html += "<td>" + data[i].subcategoryname + "</td>";
+                            html += "<td class='font-weight-bold text-capitalize'>" + data[i].productname + "</td>";
+                            html += "<td style='min-width: 200px;'>" + data[i].pdescription + "</td>";
+                            html += "<td>" + data[i].price + "</td>";
+                            html += "<td>" + data[i].discount + "</td>";
+                            html += "<td style='max-width: 350px;'><img src='../" + data[i].photo + "' style='height: 80px'></td>";
+
+                            // onclick='edit_subcategory(" + JSON.stringify(subcategorie) + ")'
+                            html += "<td><button type='button' class='btn btn-warning btn-sm' onclick='edit_product(" + JSON.stringify(data[i]) + ")' style='margin-top: 7px;'><i class='fas fa-edit'></i> Edit</button>";
+                            html += "<br>";
+                            // onclick='delete_subcategory(\"" + subcategorie.subcategoryid + "\")'
+                            html += "&nbsp;&nbsp;<button type='button' class='btn btn-danger btn-sm' onclick='delete_product(\"" + data[i].productid + "\")' style='margin-top: 7px;'><i class='fas fa-trash-alt'></i> Delete</button>";
+
+                            html += "</tr>";
+
+                            srn++;
+                        }
+
+                        html += "</tbody></table>";
+                        document.getElementById("content").innerHTML = html;
+                    }
+                } else {
+                    document.getElementById("content").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            httpRequest.open("POST", "./productRequest", true);
+            httpRequest.send(formdata);
+        }
+
+        // DELETE Product Request
+        function delete_product(productid) {
+
+            if (confirm("Are you sure to delete this Product ?")) {
+
+                var formdata = new FormData();
+                formdata.append('productid', productid);
+                formdata.append('action', 'delete');
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+
+                        if (this.response == "deleted") {
+                            getproduct();
+                            setTimeout(() => {
+                                alert("Product Deleted");
+                            }, 1000)
+                        }
+                    } else {
+                    }
+                }
+                httpRequest.open("POST", "./productRequest", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        // + icon Product modal pop-up
+        function addproduct() {
+            $("#subcategorymodal").modal('show');
+            document.getElementById("productform").reset();
+            $("#categoryid").attr('readonly', false);
+            $("#img123").attr('src', '');
+            $("#action").val('add');
+            $("#form-heading").html('Create New Product');
+        }
+
+        // UPDATE Product Request
+        function edit_product(product_obj) {
+            $("#subcategorymodal").modal('show');
+            $("#form-heading").html('Edit Product');
+
+            $("#categoryid").val(product_obj.categoryid)
+            $("#categoryid").attr('readonly', true);
+
+            $("#productname").val(product_obj.productname);
+            $("#productid").val(product_obj.productid);
+            $("#price").val(product_obj.price);
+            $("#discount").val(product_obj.discount);
+            $("#pdescription").val(product_obj.pdescription);
+
+            $("#img123").attr('src', '../' + product_obj.photo);
+            $("#action").val('edit');
+            // SUB-CATEGORY
+            getsubcategoriesbycategory(product_obj.categoryid, product_obj.subcategoryid);
+            // $("#subcategoryid").val(product_obj.subcategoryid);
+        }
+
+        //  --* TO check User SESSION is created or not *--
+        function checkSession() {
+            let formData = new FormData();
+
+            // ID-> action ki Value (view) fix send karenge.
+            formData.append("action", "session");
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.response);
+                    if (this.response == "") {
+                        window.location.assign("/admin/adminlogin")
+                    } else {
+
+                    }
+                }
+            }
+            // httpRequest.open("GET", "./checkSession", true);
+            httpRequest.open("POST", "./productRequest", true);
+            httpRequest.send(formData);
+        }
+
+        $(document).ready(function () {
+            // checkSession();
+            getproduct();
+            getcategories();
+        })
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('adminHeader') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Manage Products</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/admin/admindashboard">Home</a></li>
+                        <li class="breadcrumb-item active">Manage Products</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <!-- Add new Product ICON (plus)-->
+    <div class="container mt-5">
+        <h2 class="text-center mt-3" style="text-decoration: underline">Manage <strong
+                    style="color: tomato;">PRODUCT</strong>
+        </h2>
+        <hr>
+        <div class="row">
+            <div class="form-group">
+
+                <button type="button" class="btn btn-success" onclick="addproduct()">Add New PRODUCT <i
+                            class="fa fa-plus-circle"></i></button>
+            </div>
+            <!-- HTML Table-->
+            <div class="table-responsive" id="content"></div>
+            <!-- //HTML Table-->
+        </div>
+        <!--</div>-->
+    </div>
+    <!-- //Add new Product ICON (plus)-->
+
+    <%- include('../footer') %>
+
+    <!-- MODAL (ADD, EDIT Product)-->
+    <div class="modal fade" id="subcategorymodal">
+        <div class="modal-dialog modal-lg modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="form-heading" class="alert alert-info"></h2>
+                    <a href="#" class="close" data-dismiss="modal">&times;</a>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="col-lg-12">
+                            <form id="productform">
+
+                                <!--Category, Sub-Category-->
+                                <div class="form-row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="categoryid">Category</label>
+                                            <select data-rule-required="true" name="categoryid" id="categoryid"
+                                                    class="form-control"
+                                                    onchange="getsubcategoriesbycategory(this.value,'')">
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="subcategoryid">Sub-Category</label>
+                                            <!--<input type="text" name="subcategoryname" id="subcategoryname"-->
+                                            <!--class="form-control">-->
+
+                                            <select data-rule-required="true" name="subcategoryid" id="subcategoryid"
+                                                    class="form-control">
+                                                <option value="">Select Sub-Category</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Product Name-->
+                                <div class="form-group">
+                                    <label for="productname">Product Name</label>
+                                    <input data-rule-required="true" type="text" name="productname" id="productname"
+                                           class="form-control">
+
+                                    <!-- HIDDEN -->
+                                    <input type="number" hidden name="productid" id="productid"
+                                           class="form-control">
+                                </div>
+
+                                <!-- Price, Discount-->
+                                <div class="form-row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="price">Price</label>
+                                            <input data-rule-required="true" type="number" name="price" id="price"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label for="discount">Discount (in %)</label>
+                                            <input type="number" name="discount" id="discount"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Description-->
+                                <div class="form-group">
+                                    <label for="pdescription">Description</label>
+                                    <textarea data-rule-required="true" name="pdescription" id="pdescription"
+                                              class="form-control"></textarea>
+                                </div>
+
+                                <!--Photo-->
+                                <div class="form-group">
+                                    <label for="photo">Select Photo</label>
+                                    <!--<input type="file" name="photo" id="photo" data-rule-required="true">-->
+                                    <input type="file" name="photo" id="photo">
+                                    <!--<input type="file" name="photo" id="photo" class="form-control">-->
+
+                                    <img src="" id="img123" alt="" style="height: 100px;">
+                                </div>
+
+                                <!--Buttons-->
+                                <div class="form-group">
+                                    <input type="hidden" name="action" id="action">
+                                    <input type="hidden" name="productid" id="productid">
+                                    <button type="button" id="btn1" onclick="addNewProduct()" class="btn btn-success">
+                                        Submit
+                                    </button>
+                                    <button type="button" data-dismiss="modal" class="btn btn-dark">
+                                        Cancel
+                                    </button>
+                                    <hr>
+                                    <div id="output"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="modal-footer">-->
+                <!--<a href="#" class="close" data-dismiss="modal">&times;</a>-->
+                <!--</div>-->
+            </div>
+        </div>
+    </div>
+    <!-- //MODAL (ADD, EDIT Product)-->
+</div>
+
+</body>
+</html>

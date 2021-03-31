@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Signup - e-Shop</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <style>
+
+        label {
+            color: #ab564e;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /*.page-head_agile_info_w3l {*/
+        /*    min-height: 200px !important;*/
+        /*}*/
+
+        .error {
+            font-size: 13px;
+            font-weight: normal;
+        }
+    </style>
+
+    <script>
+        function signup() {
+            $("#signupForm2").validate();
+            if ($("#signupForm2").valid()) {
+                let formControls = document.getElementById("signupForm2").elements;
+                let formData = new FormData();
+                for (let i = 0; i < formControls.length; i++) {
+                    // radio
+                    if (formControls[i].type == "radio") {
+                        if (formControls[i].checked) {
+                            formData.append(formControls[i].name, formControls[i].value);
+                        }
+
+                    }
+                    // file
+                    else if (formControls[i].type == "file") {
+                        formData.append(formControls[i].name, formControls[i].files[0]);
+
+                    } else {
+                        formData.append(formControls[i].name, formControls[i].value);
+                    }
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn1").innerHTML = "SIGNUP";
+
+                        if (this.response == "success") {
+                            window.location.assign("/users/userlogin");
+                        } else {
+
+                            setTimeout(() => {
+                               alert("This username is already exists. Please try with other Username.");
+                            }, 1000)
+                        }
+                    } else {
+                        document.getElementById("btn1").innerHTML = "<span class='spinner-border'></span>";
+                    }
+                }
+                httpRequest.open("POST", "./userSignupRequest", true);
+                httpRequest.send(formData);
+            }
+        }
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('../header') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Signup</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Signup</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <div class="container mt-5 mb-5">
+        <div class="row">
+            <div class="col-sm-8 offset-sm-2">
+                <!--<div class="col-lg-8 offset-lg-2 col-sm-6">-->
+                <div class="card">
+                    <div class="card-header text-center text-uppercase font-weight-bold h2" style="color: #231651">
+                        SignUp
+                    </div>
+                    <div class="card-body">
+                        <form id="signupForm2">
+
+                            <!-- Username, Email-->
+                            <div class="form-row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input data-rule-required="true" type="text" name="username" id="username"
+                                               class="form-control" placeholder="Enter Username">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input data-rule-required="true" type="email" name="email" id="email"
+                                               class="form-control" placeholder="Enter Email">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Firstname, Lastname-->
+                            <div class="form-row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="firstname">First Name</label>
+                                        <input data-rule-required="true" type="text" name="firstname" id="firstname"
+                                               class="form-control" placeholder="Enter First Name">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="lastname">Last Name</label>
+                                        <input data-rule-required="true" type="text" name="lastname" id="lastname"
+                                               class="form-control" placeholder="Enter last Name">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Password, Confirm Password-->
+                            <div class="form-row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input data-rule-required="true" type="password" name="password" id="password"
+                                               class="form-control" placeholder="Enter Password">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="confirmpassword">Confirm Password</label>
+                                        <input data-rule-required="true" data-rule-equalto="#password" type="password"
+                                               name="confirmpassword" id="confirmpassword" class="form-control" placeholder="Enter Password Again">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--Mobile No, Address-->
+                            <div class="form-row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="address">Address</label>
+                                        <textarea data-rule-required="true" name="address" id="address"
+                                                  class="form-control" placeholder="Enter Address"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="mobileno">Mobile No.</label>
+                                        <input data-rule-required="true" type="number" name="mobileno" id="mobileno"
+                                               class="form-control" placeholder="Enter Mobile Number">
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+
+                            <!--button-->
+                            <div class="form-row">
+                                <div class="col-sm-12">
+                                    <div class="form-group text-center">
+                                        <button type="button" id="btn1" onclick="signup()" class="btn btn-success">
+                                            SIGNUP
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="col-sm-12">
+                            <div class="form-group text-center">
+                                <p style="text-decoration: underline;color: #007bff">already signup?<a
+                                            href="/users/userlogin">&nbsp;Login</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../footer') %>
+</div>
+
+</body>
+</html>

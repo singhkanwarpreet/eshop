@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <style>
+        /*.container{*/
+        /*background-color: #bfbfbf;*/
+        /*}*/
+        .cart-main {
+            border-radius: 15px;
+            box-shadow: 0px 0px 5px black;
+            padding: 5px;
+        }
+
+        .cart-main h2 {
+            color: seagreen;
+            font-size: 1.5em !important;
+            font-weight: bold;
+            margin: 5px 0px 5px 0px !important;
+            text-transform: uppercase !important;
+        }
+
+        .cart-main h4 {
+            color: darkred;
+            font-size: 1.1em !important;
+            font-weight: bold;
+            margin: 5px 0px 5px 0px !important;
+            text-transform: uppercase !important;
+        }
+
+        .cart-main h5 {
+            color: #e8470a;
+            font-size: 1.1em !important;
+            font-weight: bold;
+            text-transform: uppercase !important;
+        }
+
+        .page-head_agile_info_w3l {
+            min-height: 200px !important;
+        }
+
+        /*-- quantity-starts --*/
+        .value-minus,
+        .value-plus, .value-minus1,
+        .value-plus1 {
+
+            height: 30px;
+            /*height: 40px;*/
+
+            line-height: 13px;
+            /*line-height: 24px;*/
+
+            width: 30px;
+            /*width: 40px;*/
+
+            margin-right: 3px;
+            display: inline-block;
+            cursor: pointer;
+            position: relative;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            border: 1px solid #b2b2b2;
+            vertical-align: bottom;
+        }
+
+        .quantity-select .entry.value-minus:before,
+        .quantity-select .entry.value-plus:before, .quantity-select .entry.value-minus1:before,
+        .quantity-select .entry.value-plus1:before {
+            content: "";
+            width: 13px;
+            height: 2px;
+            background: #000;
+            left: 50%;
+            margin-left: -7px;
+            top: 50%;
+            margin-top: -0.5px;
+            position: absolute;
+        }
+
+        .quantity-select .entry.value-plus:after, .quantity-select .entry.value-plus1:after {
+            content: "";
+            height: 13px;
+            width: 2px;
+            background: #000;
+            left: 50%;
+            margin-left: -1.4px;
+            top: 50%;
+
+            margin-top: -6.2px;
+
+            position: absolute;
+        }
+
+        .value, .value1 {
+            cursor: default;
+            font-weight: bold;
+
+            width: 30px;
+            /*width: 40px;*/
+
+            height: 30px;
+            /*height: 40px;*/
+
+            padding: 8px 0px;
+            /*color: #A9A9A9;*/
+            color: #008277;
+
+            line-height: 13px;
+            /*line-height: 24px;*/
+
+            border: 1px solid #E5E5E5;
+            background-color: #E5E5E5;
+            text-align: center;
+            display: inline-block;
+            margin-right: 3px;
+        }
+
+        .quantity-select .entry.value-minus:hover,
+        .quantity-select .entry.value-plus:hover, .quantity-select .entry.value-minus1:hover,
+        .quantity-select .entry.value-plus1:hover {
+            background: #E5E5E5;
+        }
+
+        .quantity-select .entry.value-minus, .quantity-select .entry.value-minus1 {
+            margin-left: 0;
+        }
+
+        /*-- quantity-end --*/
+    </style>
+
+    <script>
+
+        // VIEW Product (Show products in tabular format)
+        function getcartproductInViewCartPage() {
+            document.getElementById("cart").innerHTML="";
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    var data = JSON.parse(this.response);
+                    console.log(data);
+
+                    document.getElementById("cartcount").innerText = data.length;
+
+                    // If CART is Empty
+                    if (data.length == 0) {
+                        document.getElementById("cart").innerHTML = "<div class='text-center jumbotron mt-5 mb-5'><a href='../products'>" +
+                            "<h3 class='text-center text-capitalize font-weight-bold text-danger p-5'>" +
+                            "Your Cart is Empty! <i class='far fa-frown'></i></h3></a></div>";
+                    }
+                    // If CART is Not-Empty
+                    else {
+                        let grandtotal = 0;
+
+                        let html = "<table class='table table-bordered mt-2 mb-2'>";
+                        html += "<thead>" +
+                            "<tr class='h5 text-center text-uppercase text-weight-bold' style='color: #000000;background-color: #87bdd8'>" +
+                            // style='max-width: 80px'
+                            "<th>Sr&nbsp;No.</th>" +
+                            "<th>Product&nbsp;Name</th>" +
+                            "<th><i class='fas fa-file-image'></i>&nbsp;Image</th>" +
+                            "<th>Price</th>" +
+                            "<th>Discount</th>" +
+                            "<th>Quantity</th>" +
+                            "<th>Total</th>" +
+                            "<th>Controls</th></tr></thead><tbody> ";
+
+                        let srno = 1;
+                        for (var i = 0; i < data.length; i++) {
+
+                            html += "<tr class='text-center' style='background-color: #cfe0e8'>";
+
+                            html += "<td>" + srno + "</td>";
+                            // 618658
+                            html += "<td><h5 style='max-width: 250px;color: #B73225;' class='font-weight-bold text-capitalize'>" + data[i].productname + "</h5></td>";
+                            html += "<td><img src='../" + data[i].photo + "' style='max-height: 100px;max-width: 100px' class='img-fluid'></td>";
+
+                            let finalprice = 0;
+                            if (data[i].discount > 0) {
+
+                                // Calculation of Discounted Price
+                                var newprice = Math.round(data[i].price - (data[i].price * (data[i].discount / 100)));
+
+                                // Actual Price
+                                html += "<td style='min-width: 100px;'><span class='text-danger'><del>$ " + data[i].price + "</span></del><br>";
+
+                                // Discounted Price
+                                html += "<span class='font-weight-bold'>$ " + newprice + "</span></td>";
+                                finalprice = newprice;
+                            } else {
+                                html += "<td><span class='font-weight-bold'>$ " + data[i].price + "</span></td>";
+                                finalprice = data[i].price;
+                            }
+
+                            html += "<td>" + data[i].discount + "%</td>";
+
+                            // Quantity (Added -,+ Buttons) 1
+                            var lessdisabled = '';
+                            var incdisabled = '';
+                            if (data[i].qty == 1) {
+                                lessdisabled = "disabled = 'disabled'"
+                            }
+                            if (data[i].qty == 5) {
+                                incdisabled = "disabled = 'disabled'"
+                            }
+
+                            html += "<td><div class='quantity mt-1 text-center' style='min-width: 100px;'>" +
+                                "<div class='quantity-select '>" +
+                                // "<div class='entry value-minus1'>&nbsp;</div>" +
+                                "<button onclick='updateQTY(" + data[i].productid + ",\"less\")' type='button' title='Minus' class='entry value-minus1' " + lessdisabled + "></button>" +
+                                "<div class='entry value1'><span>" + data[i].qty + "</span></div>" +
+                                // "<div class='entry value-plus1 active'>&nbsp;</div>" +
+                                "<button onclick='updateQTY(" + data[i].productid + ",\"inc\")' type='button' title='Add' class='entry value-plus1 active' " + incdisabled + "></button>" +
+                                "</div>" +
+                                "</div></td>"
+
+
+                            // Total Price
+                            html += "<td style='font-weight: bolder;'>" + Math.round(data[i].qty * finalprice) + "</td>";
+
+                            // Remove Product Icon
+                            html += "<td><button onclick='removeFromCart(" + data[i].productid + ")' class='btn btn-danger' title='Remove Item'><i class='fas fa-times'></i></button></td>";
+
+                            // Calculation of Grand Total
+                            grandtotal += (data[i].qty * finalprice);
+
+                            html += "</tr>";
+                            srno++;
+                        }
+                        html += "</tbody>";
+
+                        // Grand Total
+                        html += "<tfoot><tr>" +
+                            "<td colspan='7' class='text-right'><span class='alert alert-warning font-weight-bold'>GRAND TOTAL</span><br><br>" +
+                            "<span class='text-success font-weight-bold mr-5'>" + Math.round(grandtotal) + "</span></td>" +
+                            "</tr></tfoot>";
+
+                        // hidden Grand Total
+                        html += "<input type='hidden' id='grandtotal' name='grandtotal' value='" + Math.round(grandtotal) + "' class='form-control'>";
+                        html += "</table>";
+
+
+                        // html += "</div>";
+
+
+                        document.getElementById("cart").innerHTML = html;
+                    }
+                } else {
+                    // document.getElementById("content").innerHTML = "<span class='spinner-border' ></span>";
+                }
+            }
+            // httpRequest.open("GET", "./getcartproduct", true);
+            httpRequest.open("GET", "./getCartProductsFromServer", true);
+            httpRequest.send();
+        }
+
+        // +,- Button (Update Quantity)
+        function updateQTY(productid, action) {
+
+            let httpRequest = new XMLHttpRequest();
+            let formdata = new FormData();
+            formdata.append('productid', productid);
+            formdata.append('action', action);
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log(this.response);
+                    getcartproductInViewCartPage();
+                }
+            }
+            httpRequest.open("POST", "./addToCartSelectedProduct", true);
+            httpRequest.send(formdata);
+        }
+
+        // DELETE Button-> to Remove(DELETE) Product from CART
+        function removeFromCart(productid) {
+
+            // DELETE Confirmation
+            if (confirm("Are you really want to remove this product from Cart ?")) {
+
+                let formdata = new FormData();
+                formdata.append('productid', productid);
+                formdata.append('action', 'delete');
+
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+
+                        // console.log(this.response);
+                        getcartproductInViewCartPage();
+                    }
+                }
+                httpRequest.open("POST", "./addToCartSelectedProduct", true);
+                httpRequest.send(formdata);
+            }
+        }
+
+        // Proceed To Checkout request
+        function proceedToCheckout() {
+            $("#paymentForm").validate();
+            if ($("#paymentForm").valid()) {
+
+                var formcontrols = document.getElementById("paymentForm").elements;
+
+                var formdata = new FormData();
+                formdata.append('grandtotal', document.getElementById("grandtotal").value);
+                for (var i = 0; i < formcontrols.length; i++) {
+                    // alert(formcontrols[i].type);
+                    if (formcontrols[i].type == "radio") {
+                        if (formcontrols[i].checked) {
+                            formdata.append(formcontrols[i].name, formcontrols[i].value);
+                        }
+
+                    } else if (formcontrols[i].type == "file") {
+                        formdata.append(formcontrols[i].name, formcontrols[i].files[0]);
+                    } else {
+                        formdata.append(formcontrols[i].name, formcontrols[i].value);
+                    }
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("paymentBTN").innerHTML = "Proceed to checkout";
+
+                        if (this.response == "") {
+                            window.location.assign("/users/userlogin");
+                        }
+                        // COD
+                        else if (this.response == "orderSuccess") {
+                            getcartproductInViewCartPage();
+                            document.getElementById("paymentForm").reset();
+                            setTimeout(() => {
+                                alert("Your order placed.");
+                                alert("you will receive your order within 5-6 working days. Thanks for shopping with us :)")
+                                window.location.assign('/users/myorders')
+                            }, 1000)
+                        }
+                        // Error Occurs
+                        else if (this.response == "error") {
+                            alert("Error");
+                        } else {
+
+                        }
+                    } else {
+                        document.getElementById("paymentBTN").innerHTML = "<span class='spinner-border'></span>";
+                    }
+                }
+                httpRequest.open("POST", "./paymetRequest", true);
+                httpRequest.send(formdata);
+
+            }
+        }
+
+        //  --* TO check User SESSION is created or not *--
+        function checkSession() {
+
+            let httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.response);
+                    if (this.response == "") {
+                        window.location.assign("/users/userlogin");
+                    } else {
+
+                    }
+                }
+            }
+            httpRequest.open("GET", "./userSession_forCart", true);
+            httpRequest.send();
+        }
+
+        $(document).ready(function () {
+            checkSession();
+            getcartproductInViewCartPage();
+        })
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('../header') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Product Cart</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/users/userdashboard">Home</a></li>
+                        <li class="breadcrumb-item active">Product Cart</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <div class="container">
+        <!-- Product Table-->
+        <div id="cart" class="table-responsive">
+        </div>
+        <!-- //Product Table-->
+
+        <!--Add your Details-->
+        <div class="checkout-left">
+            <div class="address_form_agile mt-sm-5 mt-4">
+                <h4 class="mb-sm-4 mb-3 text-center text-capitalize" style="border-bottom: 2px solid red;">Add your
+                    Details</h4>
+
+                <!--<form action="payment.html" method="post" class="creditly-card-form agileinfo_form">-->
+                <form class="creditly-card-form agileinfo_form" id="paymentForm">
+                    <div class="creditly-wrapper wthree, w3_agileits_wrapper">
+                        <div class="information-wrapper">
+                            <div class="first-row">
+
+                                <!--&lt;!&ndash;SESSION Username&ndash;&gt;-->
+                                <!--<div class="controls form-group">-->
+
+                                <!--&lt;!&ndash;SESSION Username&ndash;&gt;-->
+                                <!--<input type="hidden" id="username" name="username" class="form-control">-->
+                                <!--</div>-->
+
+                                <!--Address-->
+                                <div class="w3_agileits_card_number_grids">
+                                    <div class="w3_agileits_card_number_grid_left form-group">
+                                        <div class="controls">
+                                            <textarea data-rule-require="true" required="" class="form-control"
+                                                      placeholder="Enter your address with your city"
+                                                      name="address" id="address" cols="0" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--province-->
+                                <div class="controls form-group">
+                                    <select data-rule-require="true" name="province" id="province"
+                                            class="option-w3ls form-control">
+                                        <option value="">-- Choose Province --</option>                                    
+                                        <option value="New Brunswick">New Brunswick</option>
+                                        <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                        <option value="NS">Nova Scotia</option>
+                                        <option value="Alberta">Alberta</option>
+                                        <option value="British Columbia">British Columbia</option>
+                                        <option value="Ontario">Ontario</option>
+                                        <option value="Price Edward Island">Prince Edward Island</option>
+                                        <option value="Quebec">Quebec</option>
+                                        <option value="Saskatchewan">Saskatchewan</option>
+                                        <option value="Northwest Territories">Northwest Territories</option>
+                                        <option value="Manitoba">Manitoba</option>
+                                        
+                                    </select>
+                                </div>
+
+                                <!--postalcode-->
+                                <div class="controls form-group">
+                                    <input type="text" class="form-control"
+                                           placeholder="postalcode" name="postalcode" id="postalcode"
+                                           required>
+                                </div>
+
+                                <!--special note-->
+                                <div class="controls form-group">
+                                    <textarea data-rule-require="true" required="" class="form-control"
+                                              placeholder="Notes about your order, e.g. special notes for delivery."
+                                              name="remarks" id="remarks" cols="0" rows="3"></textarea>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--paymentmethod (radio botton)-->
+                    <div class="form-group">
+                        <!--<input type="radio" name="payment" id="COD" value="COD">COD <br><p>Pay with cash upon delivery.</p>-->
+                        <input checked type="radio" name="paymentmethod" id="COD" value="COD" required><label for="COD">&nbsp;Cash
+                            On
+                            Delivery</label> (Pay with cash upon delivery.)
+                    </div>
+
+                    <!--checkbox-->
+                    <div class="container">
+                        <div class="form-row form-group" style="display: flex;text-align: center;">
+                            <input data-rule-require="true" type="checkbox" name="agree" id="agree">
+                            <p>&nbsp;I have read and agree to the website <span
+                                        style="color: #007bff">terms and conditions.</span></p>
+                        </div>
+                    </div>
+
+                    <!--button-->
+                    <button type="button" id="paymentBTN" onclick="proceedToCheckout()" class="submit check_out btn">
+                        Proceed to checkout
+                    </button>
+                </form>
+                <br><br>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../footer') %>
+</div>
+
+</body>
+</html>

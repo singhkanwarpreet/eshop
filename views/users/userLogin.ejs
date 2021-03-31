@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>User Login</title>
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <script>
+
+        function userloginfun() {
+            $("#loginform").validate();
+            if ($("#loginform").valid()) {
+
+                let formControls = document.getElementById("loginform").elements;
+
+                let formData = new FormData();
+                for (let i = 0; i < formControls.length; i++) {
+                    formData.append(formControls[i].name, formControls[i].value);
+                }
+
+                let httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("btn1").innerHTML = "Login";
+                        // alert(this.response);
+                        if (this.response == "success") {
+                            window.location.assign("/users/userdashboard");
+                        }
+                        // Alert for INVALID username and pass..
+                        else {
+                            alert("Invalid username or password.")
+                        }
+                    } else {
+                        document.getElementById("btn1").innerHTML = "<span class='spinner-border'></span>";
+                    }
+                }
+                httpRequest.open("POST", "./ulogin", true);
+                httpRequest.send(formData);
+            }
+        }
+
+        $(document).ready(function () {
+        })
+    </script>
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('../header') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Login</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Login</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <div class="container mb-5 mt-5">
+        <form id="loginform">
+            <div class="col-sm-6 offset-sm-3 jumbotron border">
+
+                <div class="form-group col-sm-12">
+                    <input type="text" data-rule-required="true" name="username" id="username" placeholder="username"
+                           class="form-control" style="cursor: pointer">
+                </div>
+
+                <div class="form-group col-sm-12">
+                    <input type="password" data-rule-required="true" name="password" id="password"
+                           placeholder="password"
+                           class="form-control" style="cursor: pointer">
+                </div>
+
+                <div class="form-group col-sm-12 text-center">
+                    <button onclick="userloginfun()" type="button" id="btn1" class="btn btn-primary btn-lg">Login</button>
+                </div>
+            </div>
+        </form>
+        <br>
+        <div class="text-center">
+<!--            <a href="/users/usersignup" style="text-decoration: underline;color:deepskyblue;">new user? SignUp</a>-->
+<!--            <span>or</span>-->
+<!--            <a href="recoverpassword" style="text-decoration: underline">Forgot Password?</a>-->
+        </div>
+    </div>
+
+    <%- include('../footer') %>
+</div>
+
+</body>
+</html>

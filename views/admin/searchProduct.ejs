@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>e-Shop</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <%- include('../headerFiles') %>
+
+    <!-- jQuery JS -->
+    <script src="../js/vendor/jquery-1.12.0.min.js"></script>
+    <!-- jQuery Validate JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"
+            integrity="sha512-UdIMMlVx0HEynClOIFSyOrPggomfhBKJE28LKl8yR3ghkgugPnG6iLfRfHwushZl1MOPSY6TsuBDGPK2X4zYKg=="
+            crossorigin="anonymous"></script>
+
+    <script>
+        let row = '<%- JSON.stringify(data) %>'
+
+        let rawData = JSON.parse(row);
+
+        function showSearchedProducts() {
+            let html = "<div class='row'>";
+
+            for (let i = 0; i < rawData.length; i++) {
+
+                html += "<div class='col-lg-3 col-md-4 col-sm-6 mb-5'>";
+                html += "<div class='single-product-wrap'>";
+                html += "<div class='product-image'>";
+
+                let photoPath = "../../" + rawData[i].photo;
+                html += "<a href='#'><img src='" + photoPath + "' alt='Image'></a>";
+
+                html += "<div class='product-action'>";
+                html += "</div>";
+                html += "<div class='product-content'>";
+                html += "<h3 class='text-capitalize font-weight-bold'>" + rawData[i].productname + "</h3>";
+                html += "<p class='text-capitalize' style='color: #a7a9ac'>" + rawData[i].pdescription + "</p>";
+
+                if (rawData[i].discount > 0) {
+                    // Calculation of Discounted Price
+                    var newprice = Math.round(rawData[i].price - (rawData[i].price * (rawData[i].discount / 100)));
+
+                    html += "<div class='price-box'>";
+                    html += "<span class='old-price text-danger'>&#x20B9; " + rawData[i].price + "</span>";
+                    html += "&nbsp;&nbsp;";
+                    html += " <span class='text-success'>" + rawData[i].discount + "% OFF</span>";
+                    html += "<div class='text-center'>";
+                    html += " <span class='new-price'>&#x20B9; " + newprice + "</span>";
+                    html += "</div>";
+                    html += "</div>";
+                } else {
+                    html += "<div class='price-box'>";
+                    html += "<div class='text-center'>";
+                    html += " <span class='new-price'>&#x20B9; " + rawData[i].price + "</span>";
+                    html += "</div>";
+                    html += "</div>";
+                }
+                // Add To Cart
+                html += "<div>";
+                html += "<button onclick='addtocart(" + JSON.stringify(rawData[i]) + ")' type='button' class='btn btn-info btn-lg text-capitalize'>Add To Cart</button>";
+                html += "</div>";
+                html += "</div>";
+                html += "</div>";
+                html += "</div>";
+                html += "</div>";
+            }
+            html += "</div>";
+            document.getElementById("searchedproducts2").innerHTML = html;
+        }
+
+        $(document).ready(function () {
+            getcartproduct();
+            showSearchedProducts();
+        });
+    </script>
+
+</head>
+<body>
+
+<!-- Main Wrapper Start -->
+<div class="main-wrapper home-2">
+
+    <%- include('../header') %>
+
+    <!-- breadcrumb-area start -->
+    <div class="breadcrumb-area section-ptb pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2 class="breadcrumb-title">Searched Products</h2>
+                    <!-- breadcrumb-list start -->
+                    <ul class="breadcrumb-list">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Searched Products</li>
+                    </ul>
+                    <!-- breadcrumb-list end -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- breadcrumb-area end -->
+
+    <!-- Searched Products start -->
+    <div class="product-area section-pb mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- section-title start -->
+                    <div class="section-title">
+                        <h2>Searched Products</h2>
+                    </div>
+                    <!-- section-title end -->
+                </div>
+            </div>
+
+            <!-- product-warpper start -->
+            <div class="product-warpper" id="searchedproducts2">
+                <div class="row"></div>
+            </div>
+            <!-- product-warpper start -->
+        </div>
+    </div>
+    <!-- //Searched Products end -->
+
+    <!-- lg-banner-bg start -->
+    <div class="lg-banner-area lg-banner-bg-2 section-ptb mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7 offset-lg-5">
+                    <div class="lg-banner-info text-center mt--30 mb--30">
+                        <h2>Contrary to popular belief is not simply rand.</h2>
+                        <a href="#" class="btn more-product-btn">MORE PRODUCTS</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //lg-banner-bg end -->
+
+    <!-- our-brand-area start -->
+    <div class="our-brand-area section-ptb">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="our-brand-active">
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/1.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/2.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/3.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/4.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/5.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/3.jpg" alt=""></a>
+                        </div>
+                        <div class="single-brand">
+                            <a href="#"><img src="../images/brand/4.jpg" alt=""></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //our-brand-area end -->
+
+    <%- include('../footer') %>
+
+</div>
+<!-- Main Wrapper End -->
+
+</body>
+</html>

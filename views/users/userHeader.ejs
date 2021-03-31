@@ -1,0 +1,100 @@
+<!-- header-area start -->
+<div class="header-area">
+
+    <div class="header-bottom-area header-sticky">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-2 col-md-5 col-5">
+                    <div class="logo">
+                        <a href="/"><img src="../images/logo/logo.png" alt=""></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 d-none d-lg-block">
+                    <div class="main-menu-area text-center">
+                        <nav class="main-navigation">
+                            <ul>
+                                <li class="active"><a href="/users/userdashboard"><i class="fa fa-home"></i> Dashboard</a></li>
+
+                                <li><a href="/users/myorders"><i class="fas fa-shopping-cart"></i> My Orders</a></li>
+
+                                <li><a href="/users/userchangepassword"><i class="fas fa-key"></i> Change Password</a></li>
+
+                                <li onclick="userlogout()"><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+
+                                <li><a href="/users/usercart"><i class="icon-handbag"></i> View Cart</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-7 col-7">
+                    <div class="right-blok-box d-flex">
+
+                        <div class="user-wrap"></div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="mobile-menu d-block d-lg-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- header-area end -->
+
+<!-- main-search start -->
+<div class="main-search-active">
+    <div class="sidebar-search-icon">
+        <button class="search-close"><span class="icon-close"></span></button>
+    </div>
+    <div class="sidebar-search-input">
+        <form>
+            <div class="form-search">
+                <input id="search" class="input-text" value="" placeholder="Search entire store here ..." type="search">
+                <button class="search-btn" type="button">
+                    <i class="icon-magnifier"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- main-search start -->
+
+<!-- main-search start -->
+<div class="main-search-active">
+    <div class="sidebar-search-icon">
+        <button class="search-close"><span class="icon-close"></span></button>
+    </div>
+    <div class="sidebar-search-input">
+        <form>
+            <div class="form-search">
+                <input id="search" class="input-text" value="" placeholder="Search entire store here ..." type="search">
+                <button class="search-btn" type="button">
+                    <i class="icon-magnifier"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- main-search start -->
+
+
+<script>
+
+    function userlogout() {
+        let httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+
+                if (this.response == "logout") {
+                    window.location.assign("/users/userlogin");
+                }
+            }
+        }
+        httpRequest.open("GET", "./userlogout", true);
+        httpRequest.send();
+    }
+
+</script>
